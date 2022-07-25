@@ -10,7 +10,7 @@ socket.on("connect", function (sockett) {
 socket.on("yaratilganUser", function (message) {
   console.log(message);
   const li = document.createElement("li");
-  li.innerText = `${message.from}: ${message.text}`;
+  li.innerText = `${message.from}: ${message.createdAt} : ${message.text}`;
 
   document.querySelector("body").appendChild(li);
 });
