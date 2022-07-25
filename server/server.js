@@ -5,6 +5,7 @@ const http = require("http");
 const express = require("express");
 const socket = require("socket.io");
 
+const generate = require("./utility/message");
 const app = express();
 
 const server = http.createServer(app);
@@ -16,27 +17,18 @@ console.log(publicUrl);
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.emit("yaratilganUser", {
-    name: "Admin",
-    text: "Welcome to room new User",
-    createdAt: new Date().getTime(),
-  });
+  socket.emit("yaratilganUser", generate("Admin", "Welcome to Chat app"));
 
-  socket.broadcast.emit("yaratilganUser", {
-    name: "Admin",
-    text: "Room is joined new User",
-    createdAt: new Date().getTime(),
-  });
+  socket.broadcast.emit(
+    "yaratilganUser",
+    generate("Admin", "The room joined new user")
+  );
 
   socket.on("yangiUser", (message) => {
     console.log("sdvsd");
     console.log(message);
 
-    io.emit("yaratilganUser", {
-      name: message.name,
-      text: message.text,
-      createdAt: message.createdAt,
-    });
+    io.emit("yaratilganUser", generate(message.from, message.text));
   });
   socket.on("disconnect", () => {
     console.log("user disconnected");
