@@ -61,4 +61,5 @@ btn.addEventListener("click", function (e) {
     from: "User",
     text: Input.value,
   });
+  Input.value = "";
 });
