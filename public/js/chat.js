@@ -10,7 +10,24 @@ function scroll() {
 const btn = document.querySelector("#submit-btn");
 const Input = document.querySelector("#message");
 socket.on("connect", function (sockett) {
-  console.log("connect usert");
+  let params = window.location.search.substring(1);
+  let objR = decodeURI(params)
+    .replace(/&/g, '","')
+    .replace(/\+/g, " ")
+    .replace(/=/g, '":"');
+  console.log('{"' + objR + '"}');
+
+  let obj = JSON.parse('{"' + objR + '"}');
+  console.log(obj);
+  socket.emit("join", obj, function (err) {
+    console.log(err);
+    if (err) {
+      alert(err);
+      window.location.href = "/";
+    } else {
+      console.log("error not found");
+    }
+  });
 });
 
 socket.on("yaratilganUser", function (message) {

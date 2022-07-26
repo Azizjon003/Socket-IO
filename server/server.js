@@ -4,9 +4,9 @@ const http = require("http");
 // library
 const express = require("express");
 const socket = require("socket.io");
-const moment = require("moment");
 
 const generate = require("./utility/message");
+const string = require("./utility/string");
 const app = express();
 const server = http.createServer(app);
 
@@ -17,13 +17,26 @@ console.log(publicUrl);
 io.on("connection", (socket) => {
   console.log("a user connected");
 
-  socket.emit("yaratilganUser", generate("Admin", "Welcome to Chat app"));
+  socket.on("join", (obj, funct) => {
+    console.log(obj.name);
+    if (!string(obj.name) || !string(obj.room)) {
+      console.log("error");
+      funct("Name and room are required");
+    }
 
-  socket.broadcast.emit(
-    "yaratilganUser",
-    generate("Admin", "The room joined new user")
-  );
+    socket.join(obj.room);
+    socket.emit(
+      "yaratilganUser",
+      generate("Admin", "Welcome to " + obj.room + " room")
+    );
 
+    socket.broadcast.emit(
+      "yaratilganUser",
+      generate("Admin", `The ${obj.room} room joined new user`)
+    );
+
+    funct();
+  });
   socket.on("yangiUser", (message) => {
     console.log("sdvsd");
     console.log(message);
