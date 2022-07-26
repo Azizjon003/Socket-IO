@@ -7,12 +7,14 @@ const socket = require("socket.io");
 
 const generate = require("./utility/message");
 const string = require("./utility/string");
-const app = express();
-const server = http.createServer(app);
+const User = require("./utility/user");
 
+const app = express();
+
+const server = http.createServer(app);
 let io = socket(server);
 const publicUrl = path.join(__dirname + `/../public`);
-console.log(publicUrl);
+let users = new User();
 
 io.on("connection", (socket) => {
   console.log("a user connected");
@@ -25,26 +27,44 @@ io.on("connection", (socket) => {
     }
 
     socket.join(obj.room);
+    users.removeUser(socket.id);
+    users.addUser(socket.id, obj.name, obj.room);
+
+    io.to(obj.room).emit("updateUsers", users.getUserList(obj.room));
     socket.emit(
       "yaratilganUser",
       generate("Admin", "Welcome to " + obj.room + " room")
     );
 
-    socket.broadcast.emit(
-      "yaratilganUser",
-      generate("Admin", `The ${obj.room} room joined new user`)
-    );
+    socket.broadcast
+      .to(obj.room)
+      .emit(
+        "yaratilganUser",
+        generate("Admin", `The ${obj.room} room joined new user`)
+      );
 
     funct();
   });
   socket.on("yangiUser", (message) => {
     console.log("sdvsd");
     console.log(message);
-
-    io.emit("yaratilganUser", generate(message.from, message.text));
+    let user = users.getUser(socket.id);
+    if (user && string(message.text)) {
+      io.to(user.room).emit(
+        "yaratilganUser",
+        generate(user.name, message.text)
+      );
+    }
   });
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    const user = users.removeUser(socket.id);
+    if (user) {
+      io.to(user.room).emit("updateUsers", users.getUserList(user.room));
+      io.to(user.room).emit(
+        "yaratilganUser",
+        generate("admin", `${user.name} left  the room is ${user.room}`)
+      );
+    }
   });
 });
 

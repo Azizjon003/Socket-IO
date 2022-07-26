@@ -15,23 +15,31 @@ socket.on("connect", function (sockett) {
     .replace(/&/g, '","')
     .replace(/\+/g, " ")
     .replace(/=/g, '":"');
-  console.log('{"' + objR + '"}');
 
   let obj = JSON.parse('{"' + objR + '"}');
-  console.log(obj);
   socket.emit("join", obj, function (err) {
-    console.log(err);
     if (err) {
       alert(err);
       window.location.href = "/";
     } else {
-      console.log("error not found");
     }
   });
 });
 
+socket.on("updateUsers", function (users) {
+  console.log(users);
+  let ol = document.createElement("ol");
+  users.forEach((user) => {
+    let li = document.createElement("li");
+    li.innerHTML = user;
+    ol.appendChild(li);
+  });
+
+  let UserList = document.querySelector("#users");
+  UserList.innerHTML = "";
+  UserList.appendChild(ol);
+});
 socket.on("yaratilganUser", function (message) {
-  console.log(message);
   const template = document.querySelector("#message-template").innerHTML;
   const html = Mustache.render(template, {
     from: message.from,
